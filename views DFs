@@ -1,3 +1,5 @@
 df.head()
 
 print(type(df))
+
+print(len(df))
