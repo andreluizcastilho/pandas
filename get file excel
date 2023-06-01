@@ -1,0 +1,4 @@
+import pandas as pd
+
+teste = "/content/drive/MyDrive/Colab Notebooks/HASTAG/Projeto Inteligência Artificial em Ações |  Hashtag Programação/AULA 2/balancos/balanco_ENBR3.xls"
+balanco_teste = pd.read_excel(f'{teste}', sheet_name=0)
