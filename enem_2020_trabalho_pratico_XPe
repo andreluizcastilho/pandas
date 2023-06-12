@@ -1,0 +1,165 @@
+import pandas as pd
+from io import BytesIO
+import requests
+import zipfile
+
+url = 'https://download.inep.gov.br/microdados/microdados_enem_2020.zip'
+
+response = requests.get(url, verify=False)
+response.raise_for_status()  # Raise an exception for any unsuccessful response status
+
+filebytes = BytesIO(response.content)
+
+myzip = zipfile.ZipFile(filebytes)
+myzip.extractall('./enem2020')
+
+
+enem = pd.read_csv('./enem2020/DADOS/MICRODADOS_ENEM_2020.csv', sep=';', encoding='latin1')
+
+enem.columns
+
+enem.shape
+
+enem.head()
+
+enem.tail()
+
+dict(enem.dtypes)
+
+enem.NU_NOTA_MT.isnull().sum()
+
+enem.NU_NOTA_MT.isnull().sum() / enem.shape[0]
+
+tp_enem = enem[[
+    'SG_UF_ESC',
+    'CO_MUNICIPIO_ESC',
+    'NO_MUNICIPIO_ESC', 
+    'CO_UF_PROVA',
+    'TP_SEXO',
+    'NO_MUNICIPIO_PROVA',
+    'Q021',
+    'Q016',
+    'Q001',
+    'Q002',
+    'Q005',
+    'Q006',
+    'TP_LINGUA',
+    'TP_FAIXA_ETARIA',
+    'TP_ESCOLA',
+    'CO_PROVA_CN',
+    'NU_NOTA_CN',
+    'CO_PROVA_CH',
+    'NU_NOTA_CH',
+    'CO_PROVA_LC',
+    'NU_NOTA_LC',
+    'CO_PROVA_MT',
+    'NU_NOTA_MT'
+]]
+
+
+# 1 - Qual é a média da nota em matemática dos alunos que estudaram numa escola em Minas Gerais?
+q1 = tp_enem.loc[tp_enem.SG_UF_ESC == 'MG']
+q1[['NU_NOTA_MT']].mean()
+
+
+# 2 - Qual é a média da nota em Linguagens e Códigos dos alunos que estudaram numa escola em Minas Gerais?
+q2 = tp_enem.loc[tp_enem.SG_UF_ESC == 'MG']
+q2[['NU_NOTA_LC']].mean()
+
+
+# 3 -Qual é a média da nota em Ciências Humanas dos alunos do sexo FEMININO que estudaram numa escola em Minas Gerais?
+q3 = tp_enem.loc[(tp_enem.SG_UF_ESC == 'MG') & (tp_enem.TP_SEXO == 'F')]
+q3[['NU_NOTA_CH']].mean()
+
+# 4 - Qual é a média da nota em Ciências Humanas dos alunos do sexo MASCULINO que estudaram numa escola em Minas Gerais?
+q4 = tp_enem.loc[(tp_enem.SG_UF_ESC == 'MG') & (tp_enem.TP_SEXO == 'M')]
+q4[['NU_NOTA_CH']].mean()
+
+# 5 - Qual é a média da nota em Matemática dos alunos do sexo FEMININO que estudaram numa escola na cidade de Montes Claros?
+q5 = tp_enem.loc[(tp_enem.NO_MUNICIPIO_ESC == 'Montes Claros') & (tp_enem.TP_SEXO == 'F')]
+q5[['NU_NOTA_MT']].mean()
+
+
+# 6 - Qual é a média da nota em Matemática dos alunos que estudaram numa escola
+# no município de Sabará e que possuem TV por assinatura na residência?
+q6 = tp_enem.loc[(tp_enem.NO_MUNICIPIO_ESC == 'Sabará') & (tp_enem.Q021 == 'B')]
+q6[['NU_NOTA_MT']].mean()
+
+
+# 7 - Qual é a média da nota em Ciências Humanas dos alunos que estudaram numa
+# escola em Minas Gerais e que possuem dois fornos micro-ondas em casa?
+q7 = tp_enem.loc[(tp_enem.SG_UF_ESC == 'MG') & (tp_enem.Q016 == 'C')]
+q7[['NU_NOTA_CH']].mean()
+
+
+# 8 - Qual é a nota média em Matemática dos alunos que estudaram numa escola em
+# Minas Gerais e cuja mãe completou a pós-graduação?
+q8 = tp_enem.loc[(tp_enem.SG_UF_ESC == 'MG') & (tp_enem.Q002 == 'G')]
+q8[['NU_NOTA_MT']].mean()
+
+
+# 9 - Qual é a nota média em Matemática dos alunos que estudaram numa escola em
+# Belo Horizonte ou em Conselheiro Lafaiete?
+q9 = tp_enem.loc[
+    (tp_enem.NO_MUNICIPIO_ESC == 'Belo Horizonte') | 
+    (tp_enem.NO_MUNICIPIO_ESC == 'Conselheiro Lafaiete')
+]
+q9[['NU_NOTA_MT']].mean()
+
+
+# 10 - Qual é a nota média em Ciências Humanas dos alunos que estudaram numa
+# escola em Minas Gerais e que moram sozinhos?
+q10 = tp_enem.loc[
+    (tp_enem.SG_UF_ESC == 'MG') & (tp_enem.Q005 == 1)
+]
+q10[['NU_NOTA_CH']].mean()
+
+
+# 11 - Qual é a nota média em Ciências Humanas dos alunos que estudaram numa
+# escola em Minas Gerais, cujo pai completou pós-graduação e possuem renda
+# familiar entre R$ 8.360,01 e R$ 9.405,00?
+q11 = tp_enem.loc[
+    (tp_enem.SG_UF_ESC == 'MG') & (tp_enem.Q001 == 'G') & (tp_enem.Q006 == 'L')
+]
+q11[['NU_NOTA_CH']].mean()
+
+
+# 12 - Qual é a nota média em Matemática dos alunos do sexo Feminino que estudaram
+# numa escola em Lavras e escolheram “Espanhol” como língua estrangeira?
+q12 = tp_enem.loc[
+    (tp_enem.NO_MUNICIPIO_ESC == 'Lavras') & (tp_enem.TP_SEXO == 'F') & (tp_enem.TP_LINGUA == 1)
+]
+q12[['NU_NOTA_MT']].mean()
+
+
+# 13 - Qual é a nota média em Matemática dos alunos do sexo Masculino que
+# estudaram numa escola em Ouro Preto?
+q13 = tp_enem.loc[
+    (tp_enem.NO_MUNICIPIO_ESC == 'Ouro Preto') & (tp_enem.TP_SEXO == 'M')
+]
+q13[['NU_NOTA_MT']].mean()
+
+
+# 14 - Qual é a nota média em Ciências Humanas dos alunos que estudaram numa
+# escola em Minas Gerais e possuem entre 26 e 30 anos?
+
+q14 = tp_enem.loc[
+    (tp_enem.SG_UF_ESC == 'MG') & (tp_enem.TP_FAIXA_ETARIA == 11)
+]
+q14[['NU_NOTA_CH']].mean()
+
+
+# 15 - Qual é a nota média em Matemática dos alunos do sexo FEMININO, que
+# estudaram numa escola em Belo Horizonte, Sabará, Nova Lima ou Betim e
+# estudaram em uma escola privada?
+q15 = tp_enem.loc[
+    (
+        (tp_enem.NO_MUNICIPIO_ESC == 'Belo Horizonte') | 
+        (tp_enem.NO_MUNICIPIO_ESC == 'Sabará') | 
+        (tp_enem.NO_MUNICIPIO_ESC == 'Nova Lima') |
+        (tp_enem.NO_MUNICIPIO_ESC == 'Betim')
+    ) &
+    (tp_enem.TP_SEXO == 'F') & 
+    (tp_enem.TP_ESCOLA == 3)
+]
+q15[['NU_NOTA_MT']].mean()
